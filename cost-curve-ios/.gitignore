@@ -1,6 +1,12 @@
 ### Xcode ###
 ## User settings
-xcuserdata/
+*.xcworkspace
+*.xcuserdata
+*.xcuserstate
+DerivedData/
+build/
+
+
 
 ## Xcode 8 and earlier
 *.xcscmblueprint
@@ -15,3 +21,12 @@ xcuserdata/
 /*.gcno
 **/xcshareddata/WorkspaceSettings.xcsettings
 
+# Swift Package Manager
+.build/
+Packages/
+
+# CocoaPods
+Pods/
+
+# macOS
+.DS_Store
