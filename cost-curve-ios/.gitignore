@@ -1,0 +1,39 @@
+### Xcode ###
+## User settings
+*.xcworkspace
+*.xcuserdata
+*.xcuserstate
+DerivedData/
+build/
+
+## Xcode 8 and earlier
+*.xcscmblueprint
+*.xccheckout
+
+### Xcode Patch ###
+*.xcodeproj/*
+!*.xcodeproj/project.pbxproj
+!*.xcodeproj/xcshareddata/
+!*.xcodeproj/project.xcworkspace/
+!*.xcworkspace/contents.xcworkspacedata
+/*.gcno
+**/xcshareddata/WorkspaceSettings.xcsettings
+
+# Swift Package Manager
+.build/
+Packages/
+
+# CocoaPods
+Pods/
+
+# macOS
+.DS_Store
+
+# Our secrets config file (do NOT commit your API keys)
+Config/Secrets.xcconfig
+
+# Ignore Xcode project settings
+*.xcworkspace
+*.xcuserdata
+*.xcuserstate
+*.pbxproj
