@@ -31,3 +31,9 @@ Pods/
 
 # Our secrets config file (do NOT commit your API keys)
 Config/Secrets.xcconfig
+
+# Ignore Xcode project settings
+*.xcworkspace
+*.xcuserdata
+*.xcuserstate
+*.pbxproj
