@@ -6,8 +6,6 @@
 DerivedData/
 build/
 
-
-
 ## Xcode 8 and earlier
 *.xcscmblueprint
 *.xccheckout
@@ -30,3 +28,6 @@ Pods/
 
 # macOS
 .DS_Store
+
+# Our secrets config file (do NOT commit your API keys)
+Config/Secrets.xcconfig
