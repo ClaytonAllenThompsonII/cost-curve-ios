@@ -1,7 +1,17 @@
+//
+//  LoginView.swift
+//  cost-curve-ios
+//
+//  Created by Clayton Thompson on 3/9/25.
+//
+
 import SwiftUI
 import CoreHaptics
 
 struct LoginView: View {
+    // Binds to the app’s `isLoggedIn` state variable
+    @Binding var isLoggedIn: Bool
+    
     // MARK: - State Variables
     @State private var username: String = ""
     @State private var password: String = ""
@@ -55,7 +65,6 @@ struct LoginView: View {
                             .foregroundColor(.secondary)
                     }
                     
-                    
                     // MARK: - Text Fields (with SF Symbols)
                     VStack(spacing: 16) {
                         HStack {
@@ -94,13 +103,21 @@ struct LoginView: View {
                         generator.impactOccurred()
                         
                         isLoading = true
+                        
+                        // Call AuthService to log in
                         AuthService.shared.login(username: username, password: password) { token in
-                            isLoading = false
-                            if let token = token {
-                                TokenManager.shared.saveToken(token)
-                                print("Login successful, token = \(token)")
-                            } else {
-                                errorMessage = "Invalid credentials"
+                            DispatchQueue.main.async {
+                                isLoading = false
+                                if let token = token {
+                                    // Save the token
+                                    TokenManager.shared.saveToken(token)
+                                    print("Login successful, token = \(token)")
+                                    
+                                    // Switch to the next view (e.g., DashboardView)
+                                    isLoggedIn = true
+                                } else {
+                                    errorMessage = "Invalid credentials"
+                                }
                             }
                         }
                     }) {
@@ -145,6 +162,7 @@ struct LoginView: View {
             }
         }
         .onAppear {
+            // Fade the card container in
             withAnimation(.easeOut(duration: 0.6)) {
                 cardOpacity = 1.0
             }
@@ -156,9 +174,9 @@ struct LoginView: View {
 struct LoginView_Previews: PreviewProvider {
     static var previews: some View {
         Group {
-            LoginView()
+            LoginView(isLoggedIn: .constant(false))
                 .previewDisplayName("Light Mode")
-            LoginView()
+            LoginView(isLoggedIn: .constant(false))
                 .preferredColorScheme(.dark)
                 .previewDisplayName("Dark Mode")
         }
