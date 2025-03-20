@@ -8,9 +8,11 @@
 import Foundation
 
 struct ProductClassification: Codable {
-    let id: Int
-    let classificationName: String
+    let classification_id: Int
+    let name: String
     // ... match your DRF serializer fields
+    // Provide an 'id' property so SwiftUI knows each item's unique ID
+    var id: Int { classification_id }
 }
 
 class ProductService {

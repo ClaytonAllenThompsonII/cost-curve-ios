@@ -6,6 +6,8 @@ struct ImageClassificationView: View {
     @State private var classificationResults: [ClassificationResult] = []
     @State private var isShowingImagePicker = false
     
+    // Product Classifications
+    @State private var productClassifications: [ProductClassification] = []
     // Weight Input
     @State private var manualWeightString: String = ""
     @State private var selectedUnit: String = "lbs"
@@ -154,37 +156,77 @@ struct ImageClassificationView: View {
                         .font(.title2)
                         .fontWeight(.semibold)
                     
-                    ScrollView {
-                        VStack(alignment: .leading, spacing: 16) {
-                            // Example Stage Cards
-                            MinimalStageCard(
-                                stageTitle: "Unstaged Products",
-                                items: ["Item A", "Item B", "Item C"]
-                            )
-                            MinimalStageCard(
-                                stageTitle: "Staging",
-                                items: ["Staging Product 1"]
-                            )
-                            MinimalStageCard(
-                                stageTitle: "Staged Products",
-                                items: ["Staged Product 1"]
-                            )
-                            StageCycleCard(cycleID: "12345", isCommitted: false)
-                        }
-                        .padding(.top, 6)
-                    }
-                    
                     Spacer()
+                            
+                            // Start Inventory Cycle button
+                            Button("Start Inventory Cycle") {
+                                // TODO: Add logic for starting cycle
+                                print("Start Inventory Cycle tapped")
+                            }
+                            .buttonStyle(.borderedProminent)
+                            
+                    
+                    ScrollView { VStack(alignment: .leading, spacing: 16) {
+                        // Unstaged Products
+                        CollapsibleResizableCard(
+                            stageTitle: "Unstaged Products",
+                            items: productClassifications.map { $0.name }
+                        )
+                        
+                        // Staging
+                        CollapsibleResizableCard(
+                            stageTitle: "Staging",
+                            items: ["Staging Product 1"]
+                        )
+                        
+                        // Staged
+                        CollapsibleResizableCard(
+                            stageTitle: "Staged Products",
+                            items: ["Staged Product 1"]
+                        )
+                        
+                        // Stage Cycle
+                        CollapsibleResizableCard(
+                            stageTitle: "Cycle Commit Summary",
+                            items: [
+                                "Cycle ID: 12345",
+                                "Committed: false"
+                            ]
+                        )
+                        // Commit Cycle button
+                        Button("Commit Cycle") {
+                            // TODO: Add logic for committing cycle
+                            print("Commit Cycle tapped")
+                        }
+                        .buttonStyle(.borderedProminent)
+                        
+                    }
+                    .padding(.top, 6)
                 }
-                .frame(maxWidth: .infinity)
-                .padding()
+                Spacer()
+                
+                
+                
             }
-            .padding(.horizontal, 20)
+            .frame(maxWidth: .infinity)
+            .padding()
         }
+        .padding(.horizontal, 20)
+    }
+                                            
+        // MARK: - Image Picker Sheet
         .sheet(isPresented: $isShowingImagePicker) {
             ImagePicker(selectedImage: $selectedImage)
         }
-    }
+        // MARK: - Fetch Products on Appear
+                .onAppear {
+                    ProductService.shared.fetchProductClassifications { fetched in
+                        DispatchQueue.main.async {
+                            self.productClassifications = fetched
+                        }
+                    }
+                }
+            }
     
     // MARK: - Classification Logic
     private func classifyImage() {
@@ -197,31 +239,92 @@ struct ImageClassificationView: View {
     }
 }
 
-// MARK: - MinimalStageCard for Unstaged, Staging, Staged
-struct MinimalStageCard: View {
+// MARK: - Now, CollapsibleStageCard -- prev MinimalStageCard for Unstaged, Staging, Staged
+/// A card that can collapse/expand and has a drag-resizable content area.
+/// Perfect for showing a header and a scrollable list of items.
+struct CollapsibleResizableCard: View {
     let stageTitle: String
     let items: [String]
     
+    // Whether the card is expanded (content visible) or collapsed (content hidden)
+    @State private var isExpanded: Bool = true
+    
+    // The dynamic height of the content area when expanded
+    @State private var cardHeight: CGFloat = 200
+    
+    // Minimum and maximum allowable heights
+    let minHeight: CGFloat = 100
+    let maxHeight: CGFloat = 600
+    
     var body: some View {
         VStack(alignment: .leading, spacing: 8) {
-            Text(stageTitle)
-                .font(.headline)
-                .padding(.bottom, 2)
+            // MARK: - Header (title + chevron)
+            HStack {
+                Text(stageTitle)
+                    .font(.headline)
+                Spacer()
+                Button(action: {
+                    withAnimation(.easeInOut) {
+                        isExpanded.toggle()
+                    }
+                }) {
+                    Image(systemName: isExpanded ? "chevron.down" : "chevron.right")
+                        .foregroundColor(.primary)
+                }
+                .buttonStyle(.plain)
+            }
+            .padding(.bottom, 2)
             
-            if items.isEmpty {
-                Text("No items in this stage.")
-                    .foregroundColor(.secondary)
-                    .font(.subheadline)
-            } else {
-                ForEach(items, id: \.self) { item in
-                    HStack(spacing: 6) {
-                        Text("•")
-                            .font(.headline)
-                            .foregroundColor(Color("AccentColor"))
-                        Text(item)
+            // MARK: - Expandable/Collapsible Content
+            if isExpanded {
+                // We wrap the list in a scrollable container
+                VStack(spacing: 0) {
+                    if items.isEmpty {
+                        Text("No items in this stage.")
+                            .foregroundColor(.secondary)
                             .font(.subheadline)
+                            .padding(.vertical, 6)
+                    } else {
+                        // A scrollable list of items with subtle dividers
+                        ScrollView {
+                            VStack(spacing: 0) {
+                                ForEach(items.indices, id: \.self) { index in
+                                    HStack {
+                                        Text(items[index])
+                                            .font(.subheadline)
+                                            .foregroundColor(.primary)
+                                        Spacer()
+                                    }
+                                    .padding(.vertical, 6)
+                                    
+                                    // Divider after each row except the last
+                                    if index < items.count - 1 {
+                                        Divider()
+                                            .background(Color.gray.opacity(0.3))
+                                    }
+                                }
+                            }
+                        }
                     }
                 }
+                // The card's content is sized by cardHeight
+                .frame(height: cardHeight)
+                .clipped()
+                // Overlay a transparent rectangle at the bottom to handle drag gestures
+                .overlay(
+                    Rectangle()
+                        .fill(Color.clear)
+                        .frame(height: 8)  // A small "handle" area
+                        .gesture(
+                            DragGesture()
+                                .onChanged { value in
+                                    let newHeight = cardHeight + value.translation.height
+                                    // Clamp between minHeight and maxHeight
+                                    cardHeight = min(max(newHeight, minHeight), maxHeight)
+                                }
+                        ),
+                    alignment: .bottom
+                )
             }
         }
         .padding()
