@@ -129,14 +129,36 @@ struct ImageClassificationView: View {
                         HStack(spacing: 8) {
                             // Display the user’s input or IoT reading
                             Text("\(calculatedWeight, specifier: "%.2f") \(selectedUnit)")
-                                .font(.title2)
-                                .foregroundColor(.green)
+                            // 1) Large, monospaced font (44pt).
+                                //    If you have "Digital-7" as a custom font, use .font(.custom("Digital-7", size: 44))
+                                .font(.system(size: 22, weight: .regular, design: .monospaced))
+
+                                // 2) Text color: bright green (#00ff00)
+                                .foregroundColor(Color.green)
+                                
+                                // 3) Background color: dark gray (#333)
+                                .padding(20)
+                                .background(Color(red: 0.2, green: 0.2, blue: 0.2)) // #333 is approximately (0.2, 0.2, 0.2)
+                                
+                                // 4) Rounded corners + shadow
+                                .cornerRadius(10)
+                                .shadow(color: Color.black.opacity(0.5), radius: 10, x: 0, y: 0)
+                                
+                                // 5) Constrain width (similar to max-width: 300px)
+                                .frame(maxWidth: 300)
+                                
+                                // 6) Optional: center horizontally + add top margin
+                                .padding(.top, 20)
+                                .frame(maxWidth: .infinity, alignment: .center)
                             
                             // Button to fetch from IoT scale (placeholder)
                             Button("Get from IoT Scale") {
                                 // Some action to read from hardware or mock
                             }
                             .buttonStyle(.borderedProminent)
+                            // 6) Optional: center horizontally + add top margin
+                            .padding(.top, 20)
+                            .frame(maxWidth: .infinity, alignment: .center)
                         }
                     }
                     .padding()
